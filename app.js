@@ -13,7 +13,9 @@ function startApp() {
 
 function clickHandler() {
     clicks += 1;
+    balance += 1;  // Увеличиваем баланс на 1 за каждый клик
     document.getElementById('clicks').innerText = clicks;
+    document.getElementById('balance').innerText = balance;
     saveUserData();
 }
 
@@ -65,7 +67,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     }
 });
 
-// Запрет двойного тапа и масштабирования
+// Запрещаем двойной тап и масштабирование
 document.addEventListener('gesturestart', function (e) {
     e.preventDefault();
 });
