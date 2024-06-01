@@ -1,60 +1,38 @@
-let balance = 0;
-const urlParams = new URLSearchParams(window.location.search);
-const userId = urlParams.get('user_id');
+import logging
+from aiohttp import web
+import aiosqlite
 
-function startApp() {
-    console.log("Starting app for user_id:", userId);
-    document.getElementById('start-app').classList.add('hidden');
-    document.getElementById('app').classList.remove('hidden');
-    loadBalanceFromServer();
-}
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
 
-function clickHandler() {
-    balance += 1;
-    document.getElementById('balance').innerText = balance;
-    saveBalanceToServer(balance);
-}
+async def get_user_data(request):
+    user_id = request.query.get('user_id')
+    logging.info(f"Fetching data for user_id: {user_id}")
+    async with aiosqlite.connect('bot_database.db') as db:
+        async with db.execute('SELECT balance FROM users WHERE user_id = ?', (user_id,)) as cursor:
+            result = await cursor.fetchone()
+            if result:
+                balance = result[0]
+            else:
+                balance = 0
+    logging.info(f"User data: {user_id}, Balance: {balance}")
+    return web.json_response({'user_id': user_id, 'balance': balance})
 
-async function loadBalanceFromServer() {
-    try {
-        console.log("Loading balance for user_id:", userId);
-        const response = await fetch(`/get_user_data?user_id=${userId}`);
-        const data = await response.json();
-        balance = data.balance || 0;
-        document.getElementById('balance').innerText = balance;
-        console.log("Balance loaded:", balance);
-    } catch (error) {
-        console.error('Error loading balance:', error);
-    }
-}
+async def update_user_data(request):
+    data = await request.json()
+    user_id = data.get('user_id')
+    balance = data.get('balance')
+    logging.info(f"Updating data for user_id: {user_id}, Balance: {balance}")
+    async with aiosqlite.connect('bot_database.db') as db:
+        await db.execute('INSERT OR REPLACE INTO users (user_id, balance) VALUES (?, ?)', (user_id, balance))
+        await db.commit()
+    logging.info(f"User data updated: {user_id}, Balance: {balance}")
+    return web.json_response({'status': 'success'})
 
-async function saveBalanceToServer(newBalance) {
-    try {
-        console.log("Saving balance for user_id:", userId, "Balance:", newBalance);
-        const response = await fetch('/update_user_data', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ user_id: userId, balance: newBalance })
-        });
-        const data = await response.json();
-        console.log('Balance saved:', data);
-    } catch (error) {
-        console.error('Error saving balance:', error);
-    }
-}
+app = web.Application()
+app.router.add_get('/get_user_data', get_user_data)
+app.router.add_post('/update_user_data', update_user_data)
 
-document.addEventListener('DOMContentLoaded', (event) => {
-    if (userId) {
-        startApp();
-    }
-});
-
-// Запрет двойного тапа и масштабирования
-document.addEventListener('gesturestart', function (e) {
-    e.preventDefault();
-});
-document.addEventListener('dblclick', function (e) {
-    e.preventDefault();
-});
+if __name__ == '__main__':
+    logging.info("Starting server...")
+    web.run_app(app)
