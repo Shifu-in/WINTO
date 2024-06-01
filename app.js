@@ -1,36 +1,26 @@
-let balance = 0;
-const urlParams = new URLSearchParams(window.location.search);
-const userId = urlParams.get('user_id');
+document.addEventListener('DOMContentLoaded', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('user_id');
+    
+    if (userId) {
+        const response = await fetch(`/get_user_data?user_id=${userId}`);
+        const data = await response.json();
+        const balance = data.balance;
 
-function startApp() {
-    document.getElementById('start-app').classList.add('hidden');
-    document.getElementById('app').classList.remove('hidden');
-}
+        document.getElementById('balance').innerText = balance;
+    }
 
-function clickHandler() {
-    balance += 1;
-    document.getElementById('balance').innerText = balance;
-    saveBalanceToServer(balance);
-}
+    document.getElementById('click-button').addEventListener('click', async () => {
+        let balance = parseInt(document.getElementById('balance').innerText, 10);
+        balance += 1;
+        document.getElementById('balance').innerText = balance;
 
-async function saveBalanceToServer(newBalance) {
-    try {
-        const response = await fetch(`/update_balance?user_id=${userId}`, {
+        await fetch('/update_user_data', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ balance: newBalance })
+            body: JSON.stringify({ user_id: userId, balance: balance }),
         });
-        const data = await response.json();
-        console.log('Balance saved:', data);
-    } catch (error) {
-        console.error('Error saving balance:', error);
-    }
-}
-
-document.addEventListener('DOMContentLoaded', (event) => {
-    if (userId) {
-        startApp();
-    }
+    });
 });
