@@ -1,3 +1,4 @@
+// app.js
 let balance = 0;
 let clicks = 0;
 const urlParams = new URLSearchParams(window.location.search);
