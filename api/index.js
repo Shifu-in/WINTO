@@ -21,7 +21,7 @@ async function getUserData(req, res) {
     const { user_id } = req.query;
     const data = loadData();
     const user = data[user_id] || { balance: 0, clicks: 0 };
-    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Type', 'application/json');  // Установка заголовка Content-Type
     send(res, 200, user);
 }
 
@@ -30,7 +30,7 @@ async function updateUserData(req, res) {
     const data = loadData();
     data[newUser.user_id] = { balance: newUser.balance, clicks: newUser.clicks };
     saveData(data);
-    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Type', 'application/json');  // Установка заголовка Content-Type
     send(res, 200, { status: 'success' });
 }
 
