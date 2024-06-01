@@ -45,6 +45,15 @@ async function saveBalanceToServer(newBalance) {
     }
 }
 
+async function saveResult() {
+    try {
+        console.log("Saving result for user_id:", userId, "Balance:", balance);
+        await saveBalanceToServer(balance);
+    } catch (error) {
+        console.error('Error saving result:', error);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', (event) => {
     if (userId) {
         startApp();
