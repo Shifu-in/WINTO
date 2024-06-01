@@ -1,8 +1,13 @@
+import logging
 from aiohttp import web
 import aiosqlite
 
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
+
 async def get_user_data(request):
     user_id = request.query.get('user_id')
+    logging.info(f"Fetching data for user_id: {user_id}")
     async with aiosqlite.connect('bot_database.db') as db:
         async with db.execute('SELECT balance FROM users WHERE user_id = ?', (user_id,)) as cursor:
             result = await cursor.fetchone()
@@ -10,15 +15,18 @@ async def get_user_data(request):
                 balance = result[0]
             else:
                 balance = 0
+    logging.info(f"User data: {user_id}, Balance: {balance}")
     return web.json_response({'user_id': user_id, 'balance': balance})
 
 async def update_user_data(request):
     data = await request.json()
     user_id = data.get('user_id')
     balance = data.get('balance')
+    logging.info(f"Updating data for user_id: {user_id}, Balance: {balance}")
     async with aiosqlite.connect('bot_database.db') as db:
         await db.execute('INSERT OR REPLACE INTO users (user_id, balance) VALUES (?, ?)', (user_id, balance))
         await db.commit()
+    logging.info(f"User data updated: {user_id}, Balance: {balance}")
     return web.json_response({'status': 'success'})
 
 app = web.Application()
@@ -26,4 +34,5 @@ app.router.add_get('/get_user_data', get_user_data)
 app.router.add_post('/update_user_data', update_user_data)
 
 if __name__ == '__main__':
+    logging.info("Starting server...")
     web.run_app(app)
