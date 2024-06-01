@@ -1,38 +1,48 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const userId = urlParams.get('user_id');
+let balance = 0;
+const urlParams = new URLSearchParams(window.location.search);
+const userId = urlParams.get('user_id');
 
-    async function getUserData() {
+function startApp() {
+    document.getElementById('start-app').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    loadBalanceFromServer();
+}
+
+function clickHandler() {
+    balance += 1;
+    document.getElementById('balance').innerText = balance;
+    saveBalanceToServer(balance);
+}
+
+async function loadBalanceFromServer() {
+    try {
         const response = await fetch(`/get_user_data?user_id=${userId}`);
         const data = await response.json();
-        return data.balance;
+        balance = data.balance || 0;
+        document.getElementById('balance').innerText = balance;
+    } catch (error) {
+        console.error('Error loading balance:', error);
     }
+}
 
-    async function updateUserData(balance) {
-        await fetch('/update_user_data', {
+async function saveBalanceToServer(newBalance) {
+    try {
+        const response = await fetch('/update_user_data', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ user_id: userId, balance: balance }),
+            body: JSON.stringify({ user_id: userId, balance: newBalance })
         });
+        const data = await response.json();
+        console.log('Balance saved:', data);
+    } catch (error) {
+        console.error('Error saving balance:', error);
     }
+}
 
-    window.startApp = async function() {
-        if (userId) {
-            const balance = await getUserData();
-            document.getElementById('balance').innerText = balance;
-            document.getElementById('balance-container').style.display = 'block';
-        } else {
-            alert('User ID not found');
-        }
+document.addEventListener('DOMContentLoaded', (event) => {
+    if (userId) {
+        startApp();
     }
-
-    document.getElementById('click-button').addEventListener('click', async () => {
-        let balance = parseInt(document.getElementById('balance').innerText, 10);
-        balance += 1;
-        document.getElementById('balance').innerText = balance;
-
-        await updateUserData(balance);
-    });
 });
