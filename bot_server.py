@@ -3,7 +3,7 @@ from aiogram import Bot, Dispatcher, typesfrom aiogram.filters import Command
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButtonfrom aiohttp import web
 import asyncioimport aiosqlite
 API_TOKEN = '7098707163:AAFDsdeAL4fR9P_o2uEuChpi-KWmpz1vcFM'
-WEBHOOK_URL = 'https://yourserver.com/webhook'WEBAPP_HOST = 'localhost'
+WEBHOOK_URL = 'https://win-umber.vercel.app/'WEBAPP_HOST = 'localhost'
 WEBAPP_PORT = 3000
 logging.basicConfig(level=logging.INFO)logger = logging.getLogger(__name__)
 bot = Bot(token=API_TOKEN)
