@@ -25,7 +25,7 @@
         .hidden {
             display: none;
         }
-        #start-app, #click-button {
+        #start-app, #click-button, #save-button, #back-button {
             background-color: #007bff;
             color: white;
             border: none;
@@ -41,9 +41,15 @@
         p {
             font-size: 1.5em;
         }
+        #back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
     </style>
 </head>
 <body>
+    <button id="back-button" onclick="saveAndGoBack()">Назад</button>
     <h1>Clicker Bot</h1>
     <button id="start-app" onclick="startApp()">Earn</button>
     <div id="app" class="hidden">
