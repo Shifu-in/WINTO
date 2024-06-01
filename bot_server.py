@@ -1,20 +1,41 @@
 import logging
+import json
+import pandas as pd
 from aiohttp import web
-import aiosqlite
+from pathlib import Path
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 
+DATA_FILE = Path("user_data.json")
+EXCEL_FILE = Path("user_data.xlsx")
+TXT_FILE = Path("user_data.txt")
+
+def load_data():
+    if DATA_FILE.exists():
+        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {}
+
+def save_data(data):
+    with open(DATA_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+
+def save_to_excel(data):
+    df = pd.DataFrame.from_dict(data, orient='index')
+    df.index.name = 'user_id'
+    df.to_excel(EXCEL_FILE)
+
+def save_to_txt(data):
+    with open(TXT_FILE, 'w', encoding='utf-8') as f:
+        for user_id, info in data.items():
+            f.write(f"user_id: {user_id}, balance: {info['balance']}\n")
+
 async def get_user_data(request):
     user_id = request.query.get('user_id')
     logging.info(f"Fetching data for user_id: {user_id}")
-    async with aiosqlite.connect('bot_database.db') as db:
-        async with db.execute('SELECT balance FROM users WHERE user_id = ?', (user_id,)) as cursor:
-            result = await cursor.fetchone()
-            if result:
-                balance = result[0]
-            else:
-                balance = 0
+    data = load_data()
+    balance = data.get(user_id, {}).get("balance", 0)
     logging.info(f"User data: {user_id}, Balance: {balance}")
     return web.json_response({'user_id': user_id, 'balance': balance})
 
@@ -23,9 +44,13 @@ async def update_user_data(request):
     user_id = data.get('user_id')
     balance = data.get('balance')
     logging.info(f"Updating data for user_id: {user_id}, Balance: {balance}")
-    async with aiosqlite.connect('bot_database.db') as db:
-        await db.execute('INSERT OR REPLACE INTO users (user_id, balance) VALUES (?, ?)', (user_id, balance))
-        await db.commit()
+    
+    user_data = load_data()
+    user_data[user_id] = {"balance": balance}
+    save_data(user_data)
+    save_to_excel(user_data)
+    save_to_txt(user_data)
+    
     logging.info(f"User data updated: {user_id}, Balance: {balance}")
     return web.json_response({'status': 'success'})
 
