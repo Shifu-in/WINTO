@@ -60,6 +60,6 @@ app = web.Application()
 app.router.add_get('/get_user_data', get_user_data)
 app.router.add_post('/update_user_data', update_user_data)
 
-if __name__ == '__main__':
+if __name__ == 'main':
     logging.info("Starting server...")
     web.run_app(app)
