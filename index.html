@@ -4,13 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clicker Bot</title>
+    <style>
+        .hidden { display: none; }
+    </style>
 </head>
 <body>
     <h1>Clicker Bot</h1>
     <button id="start-app" onclick="startApp()">Earn</button>
-    <div id="balance-container" style="display: none;">
-        <p>Balance: <span id="balance"></span></p>
-        <button id="click-button">Click</button>
+    <div id="app" class="hidden">
+        <p>Balance: <span id="balance">0</span></p>
+        <button onclick="clickHandler()">Click</button>
     </div>
     <script src="app.js"></script>
 </body>
