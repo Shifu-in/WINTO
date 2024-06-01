@@ -7,45 +7,29 @@
     <title>Clicker Bot</title>
     <style>
         body {
-            background-color: #333;
-            color: #fff;
             font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-            margin: 0;
+            background-color: #f4f4f4;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            overflow: hidden;
+            margin: 0;
         }
-        h1 {
-            font-size: 2.5em;
+        .container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        .hidden {
-            display: none;
+        #balance {
+            margin: 20px 0;
         }
-        #start-app, #click-button, #save-button, #back-button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 15px 20px;
-            font-size: 20px;
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
             cursor: pointer;
-            margin: 20px;
-            border-radius: 10px;
-        }
-        #balance-container {
-            margin-top: 20px;
-        }
-        p {
-            font-size: 1.5em;
-        }
-        #back-button {
-            position: absolute;
-            top: 10px;
-            left: 10px;
         }
     </style>
 </head>
