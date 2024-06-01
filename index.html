@@ -2,72 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clicker Bot</title>
-    <style>
-        body {
-            background-color: #333;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-        h1 {
-            font-size: 2.5em;
-        }
-        .hidden {
-            display: none;
-        }
-        #start-app, #click-button, #save-button, #back-button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 15px 20px;
-            font-size: 20px;
-            cursor: pointer;
-            margin: 20px;
-            border-radius: 10px;
-        }
-        #balance-container {
-            margin-top: 20px;
-        }
-        p {
-            font-size: 1.5em;
-        }
-        #back-button {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <button id="back-button" onclick="saveAndGoBack()">Назад</button>
-    <h1>Clicker Bot</h1>
-    <button id="start-app" onclick="startApp()">Earn</button>
-    <div id="app" class="hidden">
-        <div id="balance-container">
-            <p>Balance: <span id="balance">0</span></p>
-            <p>Clicks: <span id="clicks">0</span></p>
-            <button id="click-button" onclick="clickHandler()">Click</button>
-        </div>
+<body onload="startApp()">
+    <div class="container">
+        <h1>Welcome to Clicker Bot</h1>
+        <div id="balance">Balance: <span id="balanceAmount">0</span> coins</div>
+        <button id="earnButton" onclick="clickHandler()">Earn</button>
+        <button id="backButton" onclick="saveAndGoBack()">Back</button>
     </div>
     <script src="app.js"></script>
-    <script>
-        // Запрещаем двойной тап и масштабирование
-        document.addEventListener('gesturestart', function (e) {
-            e.preventDefault();
-        });
-        document.addEventListener('dblclick', function (e) {
-            e.preventDefault();
-        });
-    </script>
 </body>
 </html>
