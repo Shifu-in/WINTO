@@ -1,6 +1,5 @@
 from aiohttp import web
 import aiosqlite
-import json
 
 async def get_user_data(request):
     user_id = request.query.get('user_id')
