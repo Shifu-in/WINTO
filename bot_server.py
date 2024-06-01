@@ -68,39 +68,6 @@ async def send_welcome(message: Message):
     await message.answer(welcome_message, reply_markup=get_subscription_keyboard())
     logger.info(f"User {message.from_user.id} started the bot.")
 
-async def click_handler(message: Message):
-    user_id = message.from_user.id
-    user_data = load_data()
-
-    async with aiosqlite.connect('bot_database.db') as db:
-        async with db.execute('SELECT balance FROM users WHERE user_id = ?', (user_id,)) as cursor:
-            result = await cursor.fetchone()
-
-        if result is None:
-            await db.execute('INSERT INTO users (user_id, balance, subscribed) VALUES (?, ?, ?)', (user_id, 0, 0))
-            await db.commit()
-            balance = 0
-        else:
-            balance = result[0]
-
-        new_balance = balance + 1
-        await db.execute('UPDATE users SET balance = ? WHERE user_id = ?', (new_balance, user_id))
-        await db.commit()
-
-    user_data[str(user_id)] = {"balance": new_balance}
-    save_data(user_data)
-    save_to_excel(user_data)
-    save_to_txt(user_data)
-
-    await message.answer(f"🎉 Вы кликнули! Ваш новый баланс: {new_balance}")
-    logger.info(f"User {message.from_user.id} clicked. New balance: {new_balance}")
-
-async def subscribe_handler(message: Message):
-    await message.answer(
-        "📢 Пожалуйста, подпишитесь на наш канал и проверьте подписку для получения бонуса 🎁.",
-        reply_markup=get_subscription_keyboard()
-    )
-
 async def check_subscription_handler(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     chat_member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
@@ -144,19 +111,10 @@ async def check_subscription_handler(callback_query: types.CallbackQuery):
 
     await bot.answer_callback_query(callback_query.id)
 
-    await bot.send_message(user_id,
-        "📋 Доступные команды:\n"
-        "/click - Нажмите для клика\n"
-        "/subscribe - Подписаться на канал\n"
-        "/check_subscription - Проверить подписку"
-    )
-
 async def main():
     await create_db()
 
     dp.message.register(send_welcome, Command("start"))
-    dp.message.register(click_handler, Command("click"))
-    dp.message.register(subscribe_handler, Command("subscribe"))
     dp.callback_query.register(check_subscription_handler, lambda c: c.data == 'check_subscription')
 
     logger.info("Starting bot polling...")
