@@ -1,74 +1,44 @@
 let balance = 0;
-let clicks = 0;
-const urlParams = new URLSearchParams(window.location.search);
-const userId = urlParams.get('user_id');
 
 function startApp() {
-    console.log("Starting app for user_id:", userId);
-    document.getElementById('start-app').classList.add('hidden');
-    document.getElementById('app').classList.remove('hidden');
-    loadUserData();
+    loadBalanceFromServer();
 }
 
 function clickHandler() {
-    clicks += 1;
-    document.getElementById('clicks').innerText = clicks;
-    saveUserData();
+    balance += 10;
+    updateBalanceDisplay();
+    saveBalanceToServer();
 }
 
-async function saveAndGoBack() {
-    try {
-        console.log("Saving data and going back for user_id:", userId, "Balance:", balance, "Clicks:", clicks);
-        await saveUserData();
-        window.history.back();
-    } catch (error) {
-        console.error('Error saving data:', error);
-    }
+function saveAndGoBack() {
+    saveBalanceToServer();
+    // Redirect to main page or perform the necessary action
+    window.location.href = 'index.html'; // Update this if necessary
 }
 
-async function loadUserData() {
-    try {
-        console.log("Loading data for user_id:", userId);
-        const response = await fetch(`/get_user_data?user_id=${userId}`);
-        const data = await response.json();
-        balance = data.balance || 0;
-        clicks = data.clicks || 0;
-        document.getElementById('balance').innerText = balance;
-        document.getElementById('clicks').innerText = clicks;
-        console.log("Data loaded:", data);
-    } catch (error) {
-        console.error('Error loading data:', error);
-    }
+function loadBalanceFromServer() {
+    fetch('/get_balance')
+        .then(response => response.json())
+        .then(data => {
+            balance = data.balance;
+            updateBalanceDisplay();
+        })
+        .catch(error => console.error('Error loading balance:', error));
 }
 
-async function saveUserData() {
-    try {
-        console.log("Saving data for user_id:", userId, "Balance:", balance, "Clicks:", clicks);
-        const response = await fetch('/update_user_data', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ user_id: userId, balance: balance, clicks: clicks })
-        });
-        const data = await response.json();
-        console.log('Data saved:', data);
-    } catch (error) {
-        console.error('Error saving data:', error);
-    }
+function saveBalanceToServer() {
+    fetch('/update_balance', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ balance: balance })
+    })
+    .then(response => response.json())
+    .then(data => console.log('Balance saved:', data))
+    .catch(error => console.error('Error saving balance:', error));
 }
 
-document.addEventListener('DOMContentLoaded', (event) => {
-    if (userId) {
-        startApp();
-    }
-});
-
-// Запрет двойного тапа и масштабирования
-document.addEventListener('gesturestart', function (e) {
-    e.preventDefault();
-});
-document.addEventListener('dblclick', function (e) {
-    e.preventDefault();
-});
-
+function updateBalanceDisplay() {
+    document.getElementById('balanceAmount').textContent = balance;
+}
