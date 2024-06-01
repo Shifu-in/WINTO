@@ -22,7 +22,7 @@ async function saveAndGoBack() {
     try {
         console.log("Saving data and going back for user_id:", userId, "Balance:", balance, "Clicks:", clicks);
         await saveUserData();
-        window.history.back();
+        window.history.back(); // Возвращаемся назад
     } catch (error) {
         console.error('Error saving data:', error);
     }
@@ -31,7 +31,7 @@ async function saveAndGoBack() {
 async function loadUserData() {
     try {
         console.log("Loading data for user_id:", userId);
-        const response = await fetch(`/get_user_data?user_id=${userId}`);
+        const response = await fetch(`https://win-umber.vercel.app/api/get_user_data?user_id=${userId}`);
         const data = await response.json();
         balance = data.balance || 0;
         clicks = data.clicks || 0;
@@ -46,7 +46,7 @@ async function loadUserData() {
 async function saveUserData() {
     try {
         console.log("Saving data for user_id:", userId, "Balance:", balance, "Clicks:", clicks);
-        const response = await fetch('/update_user_data', {
+        const response = await fetch('https://win-umber.vercel.app/api/update_user_data', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
