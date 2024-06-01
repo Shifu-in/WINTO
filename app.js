@@ -71,3 +71,4 @@ document.addEventListener('gesturestart', function (e) {
 document.addEventListener('dblclick', function (e) {
     e.preventDefault();
 });
+
