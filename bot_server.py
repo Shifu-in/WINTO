@@ -1,22 +1,15 @@
 import logging
 import json
-from aiogram import Bot, Dispatcher, types
-from aiogram.filters import Command
-from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+import pandas as pd
 from aiohttp import web
-import asyncio
 from pathlib import Path
 
-API_TOKEN = 'YOUR_API_TOKEN'
-DATA_FILE = Path("user_data.json")
-CHANNEL_ID = '@yourchannel'
-BONUS_AMOUNT = 20000
-
+# Настройка логирования
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
-bot = Bot(token=API_TOKEN)
-dp = Dispatcher()
+DATA_FILE = Path("user_data.json")
+EXCEL_FILE = Path("user_data.xlsx")
+TXT_FILE = Path("user_data.txt")
 
 def load_data():
     if DATA_FILE.exists():
@@ -28,40 +21,45 @@ def save_data(data):
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
-async def handle_get_balance(request):
-    user_id = request.query.get('user_id')
-    data = load_data()
-    balance = data.get(user_id, {}).get('balance', 0)
-    return web.json_response({'balance': balance})
+def save_to_excel(data):
+    df = pd.DataFrame.from_dict(data, orient='index')
+    df.index.name = 'user_id'
+    df.to_excel(EXCEL_FILE)
 
-async def handle_update_balance(request):
-    try:
-        data = await request.json()
-        user_id = data['user_id']
-        balance = data['balance']
-        user_data = load_data()
-        user_data[user_id] = {"balance": balance}
-        save_data(user_data)
-        return web.json_response({'status': 'success'})
-    except Exception as e:
-        logger.error(f"Error updating balance: {e}")
-        return web.json_response({'status': 'error'}, status=500)
+def save_to_txt(data):
+    with open(TXT_FILE, 'w', encoding='utf-8') as f:
+        for user_id, info in data.items():
+            f.write(f"user_id: {user_id}, balance: {info['balance']}, clicks: {info.get('clicks', 0)}\n")
+
+async def get_user_data(request):
+    user_id = request.query.get('user_id')
+    logging.info(f"Fetching data for user_id: {user_id}")
+    data = load_data()
+    balance = data.get(user_id, {}).get("balance", 0)
+    clicks = data.get(user_id, {}).get("clicks", 0)
+    logging.info(f"User data: {user_id}, Balance: {balance}, Clicks: {clicks}")
+    return web.json_response({'user_id': user_id, 'balance': balance, 'clicks': clicks})
+
+async def update_user_data(request):
+    data = await request.json()
+    user_id = data.get('user_id')
+    balance = data.get('balance')
+    clicks = data.get('clicks')
+    logging.info(f"Updating data for user_id: {user_id}, Balance: {balance}, Clicks: {clicks}")
+    
+    user_data = load_data()
+    user_data[user_id] = {"balance": balance, "clicks": clicks}
+    save_data(user_data)
+    save_to_excel(user_data)
+    save_to_txt(user_data)
+    
+    logging.info(f"User data updated: {user_id}, Balance: {balance}, Clicks: {clicks}")
+    return web.json_response({'status': 'success'})
 
 app = web.Application()
-app.router.add_get('/get_balance', handle_get_balance)
-app.router.add_post('/update_balance', handle_update_balance)
-
-async def main():
-    dp.message.register(send_welcome, Command("start"))
-
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, 'localhost', 8080)
-    await site.start()
-
-    logger.info("Starting bot polling...")
-    await dp.start_polling(bot)
+app.router.add_get('/get_user_data', get_user_data)
+app.router.add_post('/update_user_data', update_user_data)
 
 if __name__ == '__main__':
-    asyncio.run(main())
-    
+    logging.info("Starting server...")
+    web.run_app(app)
