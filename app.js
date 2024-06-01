@@ -15,6 +15,16 @@ function clickHandler() {
     saveBalanceToServer(balance);
 }
 
+async function saveAndGoBack() {
+    try {
+        console.log("Saving balance and going back for user_id:", userId, "Balance:", balance);
+        await saveBalanceToServer(balance);
+        window.history.back();
+    } catch (error) {
+        console.error('Error saving balance:', error);
+    }
+}
+
 async function loadBalanceFromServer() {
     try {
         console.log("Loading balance for user_id:", userId);
@@ -42,15 +52,6 @@ async function saveBalanceToServer(newBalance) {
         console.log('Balance saved:', data);
     } catch (error) {
         console.error('Error saving balance:', error);
-    }
-}
-
-async function saveResult() {
-    try {
-        console.log("Saving result for user_id:", userId, "Balance:", balance);
-        await saveBalanceToServer(balance);
-    } catch (error) {
-        console.error('Error saving result:', error);
     }
 }
 
