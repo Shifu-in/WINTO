@@ -1,20 +1,17 @@
-<!DOCTYPE html> 
-<html lang="ru"> 
-<head> 
-    <meta charset="UTF-8"> 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Clicker Bot</title> 
-    <link rel="stylesheet" href="styles.css"> 
-</head> 
-<body> 
-    <div class="container"> 
-        <h1>Clicker Bot</h1> 
-        <button id="start-app" onclick="startApp()">Запустить приложение</button> 
-        <div id="app" class="hidden"> 
-            <div class="balance">Баланс: <span id="balance">0</span></div> 
-            <button id="click-btn" onclick="clickHandler()">Клик</button> 
-        </div> 
-    </div> 
-    <script src="app.js"></script> 
-</body> 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clicker Bot</title>
+</head>
+<body>
+    <h1>Clicker Bot</h1>
+    <button id="start-app" onclick="startApp()">Earn</button>
+    <div id="balance-container" style="display: none;">
+        <p>Balance: <span id="balance"></span></p>
+        <button id="click-button">Click</button>
+    </div>
+    <script src="app.js"></script>
+</body>
 </html>
