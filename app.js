@@ -37,7 +37,7 @@ async function saveAndGoBack() {
 async function loadUserData() {
     try {
         console.log("Loading data for user_id:", userId);
-        const response = await fetch(`https://win-umber.vercel.app/api/get_user_data?user_id=${userId}`);
+        const response = await fetch(`https://winto.vercel.app/api/get_user_data?user_id=${userId}`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
@@ -55,7 +55,7 @@ async function loadUserData() {
 async function saveUserData() {
     try {
         console.log("Saving data for user_id:", userId, "Balance:", balance, "Clicks:", clicks);
-        const response = await fetch('https://win-umber.vercel.app/api/update_user_data', {
+        const response = await fetch('https://winto.vercel.app/api/update_user_data', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
