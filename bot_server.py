@@ -1,6 +1,5 @@
 import logging
 import json
-import pandas as pd
 from aiohttp import web
 from pathlib import Path
 
@@ -8,29 +7,22 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-DATA_FILE = Path("user_data.json")
-EXCEL_FILE = Path("user_data.xlsx")
-TXT_FILE = Path("user_data.txt")
+TXT_FILE = Path("../user_data.txt")
 
 def load_data():
-    if DATA_FILE.exists():
-        with open(DATA_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
+    if TXT_FILE.exists():
+        data = {}
+        with open(TXT_FILE, 'r', encoding='utf-8') as f:
+            for line in f:
+                user_id, balance, clicks = line.strip().split(',')
+                data[user_id] = {'balance': int(balance), 'clicks': int(clicks)}
+        return data
     return {}
 
 def save_data(data):
-    with open(DATA_FILE, 'w', encoding='utf-8') as f):
-        json.dump(data, f, ensure_ascii=False, indent=4)
-
-def save_to_excel(data):
-    df = pd.DataFrame.from_dict(data, orient='index')
-    df.index.name = 'user_id'
-    df.to_excel(EXCEL_FILE)
-
-def save_to_txt(data):
-    with open(TXT_FILE, 'w', encoding='utf-8') as f:
+    with open(TXT_FILE, 'w', encoding='utf-8') as f):
         for user_id, info in data.items():
-            f.write(f"user_id: {user_id}, balance: {info['balance']}, clicks: {info.get('clicks', 0)}\n")
+            f.write(f"{user_id},{info['balance']},{info.get('clicks', 0)}\n")
 
 async def get_user_data(request):
     user_id = request.query.get('user_id')
@@ -51,15 +43,22 @@ async def update_user_data(request):
     user_data = load_data()
     user_data[user_id] = {"balance": balance, "clicks": clicks}
     save_data(user_data)
-    save_to_excel(user_data)
-    save_to_txt(user_data)
     
     logger.info(f"User data updated: {user_id}, Balance: {balance}, Clicks: {clicks}")
     return web.json_response({'status': 'success'})
 
-app = web.Application()
-app.router.add_get('/get_user_data', get_user_data)
-app.router.add_post('/update_user_data', update_user_data)
+async def cors_middleware(app, handler):
+    async def middleware_handler(request):
+        response = await handler(request)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return response
+    return middleware_handler
+
+app = web.Application(middlewares=[cors_middleware])
+app.router.add_get('/api/get_user_data', get_user_data)
+app.router.add_post('/api/update_user_data', update_user_data)
 
 if __name__ == '__main__':
     logger.info("Starting server...")
