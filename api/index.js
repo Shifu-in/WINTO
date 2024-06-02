@@ -5,7 +5,6 @@ const path = require('path');
 
 const DATA_FILE = path.resolve(__dirname, '../user_data.txt');
 
-// Функция для логирования
 function log(message) {
     console.log(`[LOG] ${message}`);
 }
