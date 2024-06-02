@@ -3,8 +3,14 @@ let clicks = 0;
 const urlParams = new URLSearchParams(window.location.search);
 const userId = urlParams.get('user_id');
 
-function startApp() {
+if (!userId) {
+    console.error('User ID not provided!');
+} else {
     console.log("Starting app for user_id:", userId);
+    startApp();
+}
+
+function startApp() {
     document.getElementById('start-app').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
     loadUserData();
@@ -32,6 +38,9 @@ async function loadUserData() {
     try {
         console.log("Loading data for user_id:", userId);
         const response = await fetch(`https://win-umber.vercel.app/api/get_user_data?user_id=${userId}`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
         const data = await response.json();
         balance = data.balance || 0;
         clicks = data.clicks || 0;
@@ -53,6 +62,9 @@ async function saveUserData() {
             },
             body: JSON.stringify({ user_id: userId, balance: balance, clicks: clicks })
         });
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
         const data = await response.json();
         console.log('Data saved:', data);
     } catch (error) {
@@ -64,12 +76,4 @@ document.addEventListener('DOMContentLoaded', (event) => {
     if (userId) {
         startApp();
     }
-});
-
-// Запрет двойного тапа и масштабирования
-document.addEventListener('gesturestart', function (e) {
-    e.preventDefault();
-});
-document.addEventListener('dblclick', function (e) {
-    e.preventDefault();
 });
