@@ -6,7 +6,7 @@ const path = require('path');
 const DATA_FILE = path.resolve(__dirname, '../user_data.txt');
 
 function loadData() {
-    if (fs.existsSync(DATA_FILE)) {
+    if (fs.exists(DATA_FILE)) {
         const data = fs.readFileSync(DATA_FILE, 'utf8');
         const lines = data.split('\n');
         const result = {};
