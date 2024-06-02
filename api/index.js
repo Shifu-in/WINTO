@@ -3,18 +3,27 @@ const { router, get, post } = require('microrouter');
 const fs = require('fs');
 const path = require('path');
 
-const DATA_FILE = path.resolve(__dirname, 'user_data.json');
+const DATA_FILE = path.resolve(__dirname, '../user_data.txt');
 
 function loadData() {
     if (fs.existsSync(DATA_FILE)) {
         const data = fs.readFileSync(DATA_FILE, 'utf8');
-        return JSON.parse(data);
+        const lines = data.split('\n');
+        const result = {};
+        lines.forEach(line => {
+            const [user_id, balance, clicks] = line.split(',');
+            if (user_id && balance && clicks) {
+                result[user_id] = { balance: parseInt(balance, 10), clicks: parseInt(clicks, 10) };
+            }
+        });
+        return result;
     }
     return {};
 }
 
 function saveData(data) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
+    const lines = Object.keys(data).map(user_id => `${user_id},${data[user_id].balance},${data[user_id].clicks}`);
+    fs.writeFileSync(DATA_FILE, lines.join('\n'), 'utf8');
 }
 
 async function getUserData(req, res) {
